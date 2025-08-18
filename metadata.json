@@ -1,0 +1,5 @@
+{
+  "name": "SE-ZERT Learning Assistant",
+  "description": "Your personal AI tutor for mastering Systems Engineering with the SE-ZERT curriculum. Features include smart search, flashcards, summaries, podcasts, and progress tracking.",
+  "requestFramePermissions": []
+}
