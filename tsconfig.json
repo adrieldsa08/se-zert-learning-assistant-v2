@@ -10,21 +10,14 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
-<<<<<<< HEAD
-=======
-    "types": [
-      "node"
-    ],
->>>>>>> 85593d0 (Initial commit - AI Studio export)
+    "types": ["node"],
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
