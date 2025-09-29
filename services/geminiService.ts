@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-import { GoogleGenAI, Type } from "@google/genai";
-import type { Flashcard } from './types';
-import { searchChunks } from "./searchDoc";
-=======
 
 
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Flashcard, WebSource } from '../types';
 import { searchChunks, searchChunksWithCoverage } from "./searchDoc";
 import { parsePageConstraint, isGenericPageSummary, stripPageQuery } from "../utils/pageConstraint";
->>>>>>> 85593d0 (Initial commit - AI Studio export)
 
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable not set.");
@@ -17,24 +11,6 @@ if (!process.env.API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-<<<<<<< HEAD
-const baseInstruction = `You are the SE-ZERT Learning Assistant, a friendly and helpful AI tutor for Systems Engineering. Your goal is to help students like Max learn and master SE concepts. Use a friendly, helpful, and academic tone.`;
-
-const buildContext = (userPrompt: string, docChunks: string[]): string => {
-    const relevantChunks = searchChunks(userPrompt, docChunks, 4);
-    if (relevantChunks.length === 0) {
-        return "";
-    }
-    const contextHeader = "Please answer the user's request based *only* on the following context provided from their uploaded PDF document. Do not use any other knowledge.\n\n--- CONTEXT FROM UPLOADED PDF ---\n";
-    const contextBody = relevantChunks.join("\n---\n");
-    return `${contextHeader}${contextBody}\n--- END OF CONTEXT ---\n\n`;
-};
-
-const getNotFoundResponse = (hasDoc: boolean) => {
-    return hasDoc 
-        ? "I couldn't find information about that in the uploaded PDF. Please try another topic or a more specific query."
-        : "I couldn't find that in the SE-ZERT material. Please try another topic.";
-=======
 export interface GeminiToolResponse {
     content: string;
     webSources?: WebSource[];
@@ -93,29 +69,10 @@ const getNotFoundResponse = (hasDoc: boolean, topic: string) => {
     return hasDoc 
         ? `I couldn't find information about "${topic}" in the uploaded PDF. Please try another topic or a more specific query.`
         : `I couldn't find information about "${topic}" in the SE-ZERT material. Please try another topic.`;
->>>>>>> 85593d0 (Initial commit - AI Studio export)
 }
 
 export const getSearchResponse = async (
     message: string, 
-<<<<<<< HEAD
-    docChunks: string[] | null,
-    images?: { mimeType: string; data: string }[]
-): Promise<string> => {
-    let finalPrompt = message;
-    let context = "";
-
-    if (docChunks) {
-        context = buildContext(message, docChunks);
-    }
-    
-    if (docChunks && !context && (!images || images.length === 0)) {
-        return getNotFoundResponse(true);
-    }
-
-    if (context) {
-        finalPrompt = `${context}User question: "${message}"`;
-=======
     docChunks: DocChunk[] | null,
     images?: { mimeType: string; data: string }[]
 ): Promise<GeminiToolResponse> => {
@@ -216,7 +173,6 @@ export const getSearchResponse = async (
 
         finalPrompt = `${guardrail}${contextString}User question: "${cleanQuery || message}"`;
         pages = Array.from(new Set(relevantChunks.map(c => c.pageStart))).sort((a, b) => a - b);
->>>>>>> 85593d0 (Initial commit - AI Studio export)
     }
 
     const userParts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[] = [{ text: finalPrompt }];
@@ -238,13 +194,6 @@ export const getSearchResponse = async (
             contents: contents,
             config: { thinkingConfig: { thinkingBudget: 0 } },
         });
-<<<<<<< HEAD
-        return response.text;
-    } catch (error) {
-        console.error("Gemini API error (Search):", error);
-
-        // If the call with images fails, attempt a fallback to text-only
-=======
 
         let content = response.text;
         if (docChunks && pages.length > 0) {
@@ -256,7 +205,6 @@ export const getSearchResponse = async (
     } catch (error) {
         console.error("Gemini API error (Search):", error);
 
->>>>>>> 85593d0 (Initial commit - AI Studio export)
         if (images && images.length > 0) {
             console.log("Image-based search failed. Attempting fallback to text-only search.");
             try {
@@ -270,10 +218,6 @@ export const getSearchResponse = async (
                     contents: textOnlyContents,
                     config: { thinkingConfig: { thinkingBudget: 0 } },
                 });
-<<<<<<< HEAD
-                const fallbackMessage = "I couldn’t analyze the image(s) you provided, but here’s an answer based on the text:\n\n";
-                return fallbackMessage + fallbackResponse.text;
-=======
                 
                 let fallbackContent = fallbackResponse.text;
                 if (docChunks && pages.length > 0) {
@@ -283,27 +227,11 @@ export const getSearchResponse = async (
 
                 const fallbackMessage = "I couldn’t analyze the image(s) you provided, but here’s an answer based on the text:\n\n";
                 return { content: fallbackMessage + fallbackContent, pdfSource: docChunks ? "Uploaded PDF" : null, pageConstraint: constraintText };
->>>>>>> 85593d0 (Initial commit - AI Studio export)
             } catch (fallbackError) {
                 console.error("Gemini API error (Fallback Search):", fallbackError);
             }
         }
         
-<<<<<<< HEAD
-        return "I'm sorry, I seem to be having trouble connecting. Please try again in a moment.";
-    }
-};
-
-export const generateFlashcards = async (topic: string, docChunks: string[] | null): Promise<Flashcard[]> => {
-    try {
-        let context = "";
-        if (docChunks) {
-            context = buildContext(topic, docChunks);
-            if (!context) throw new Error(getNotFoundResponse(true));
-        }
-
-        const prompt = `${context}Generate 3-5 flashcards for the topic "${topic}". Each flashcard must have a 'question' and an 'answer'.`;
-=======
         return { content: "I'm sorry, I seem to be having trouble connecting. Please try again in a moment." };
     }
 };
@@ -334,7 +262,6 @@ export const generateFlashcards = async (topic: string, docChunks: DocChunk[] | 
         }
 
         const prompt = `${context}\nGenerate 3-5 flashcards for the topic "${cleanTopic}". Each flashcard must have a 'question' and an 'answer'.`;
->>>>>>> 85593d0 (Initial commit - AI Studio export)
         const response = await ai.models.generateContent({
            model: "gemini-2.5-flash",
            contents: prompt,
@@ -355,11 +282,7 @@ export const generateFlashcards = async (topic: string, docChunks: DocChunk[] | 
         });
         const jsonText = response.text.trim();
         const parsedResponse = JSON.parse(jsonText);
-<<<<<<< HEAD
-        if (!parsedResponse || parsedResponse.length === 0) throw new Error(getNotFoundResponse(!!docChunks));
-=======
         if (!parsedResponse || parsedResponse.length === 0) throw new Error(getNotFoundResponse(!!docChunks, cleanTopic));
->>>>>>> 85593d0 (Initial commit - AI Studio export)
         return parsedResponse.map((card: any, index: number) => ({ ...card, id: `${topic}-${Date.now()}-${index}` }));
     } catch (error: any) {
         console.error("Gemini API error (Flashcards):", error);
@@ -367,31 +290,6 @@ export const generateFlashcards = async (topic: string, docChunks: DocChunk[] | 
     }
 };
 
-<<<<<<< HEAD
-export const generateSummary = async (topic: string, docChunks: string[] | null): Promise<string> => {
-    try {
-        let context = "";
-        if (docChunks) {
-            context = buildContext(topic, docChunks);
-            if (!context) return getNotFoundResponse(true);
-        }
-
-        const prompt = `${baseInstruction}\n${context}\nYour task is to generate a concise, academic summary of the following topic, using 3-5 bullet points or a short paragraph.\nTopic: ${topic}`;
-        const response = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
-        return response.text;
-    } catch (error) {
-        console.error("Gemini API error (Summary):", error);
-        return "I'm sorry, I was unable to generate a summary for that topic.";
-    }
-};
-
-export const generatePodcast = async (topic: string, docChunks: string[] | null): Promise<string> => {
-    try {
-        let context = "";
-        if (docChunks) {
-            context = buildContext(topic, docChunks);
-            if (!context) return getNotFoundResponse(true);
-=======
 export const generateSummary = async (topic: string, docChunks: DocChunk[] | null): Promise<GeminiToolResponse> => {
     try {
         if (docChunks) {
@@ -514,7 +412,6 @@ export const generatePodcast = async (topic: string, docChunks: DocChunk[] | nul
             if (relevantChunks.length === 0) return getNotFoundResponse(true, cleanTopic);
             
             context = "Context from PDF:\n" + relevantChunks.map(c => c.text).join('\n---\n');
->>>>>>> 85593d0 (Initial commit - AI Studio export)
         }
 
         const prompt = `${baseInstruction}
@@ -523,11 +420,7 @@ You are now in "Podcast It!" mode. Your task is to generate a short, podcast-sty
 Use a friendly, spoken tone — like a host narrating an audio lesson for someone listening on the go.
 Your response MUST follow this structure:
 1.  **Opening:** Start with a casual, friendly opening like "🎙️ Hey Max, welcome back to your SE-ZERT learning journey!"
-<<<<<<< HEAD
-2.  **Introduction:** Introduce the topic clearly, for example: "In today’s episode, we’re diving into ${topic}." Use phrases like "Let's explore..." or "You might be wondering...".
-=======
 2.  **Introduction:** Introduce the topic clearly, for example: "In today’s episode, we’re diving into ${cleanTopic}." Use phrases like "Let's explore..." or "You might be wondering...".
->>>>>>> 85593d0 (Initial commit - AI Studio export)
 3.  **Explanation:** Explain the main points in simple, conversational language across 2-3 paragraphs.
 4.  **Closer:** End with a motivational sign-off, such as "That’s it for today’s chapter — keep learning!"
 
@@ -537,11 +430,7 @@ Your response MUST follow this structure:
 -   Keep the entire response under 4 paragraphs.
 -   Your response should start with the microphone emoji: 🎙️
 
-<<<<<<< HEAD
-Topic to explain: ${topic}`;
-=======
 Topic to explain: ${cleanTopic}`;
->>>>>>> 85593d0 (Initial commit - AI Studio export)
         const response = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
         return response.text;
     } catch (error) {
@@ -556,8 +445,4 @@ export const getCertificate = async (isReady: boolean): Promise<string> => {
         : "Keep going — you're almost there! Just finish the final topics to unlock your certificate.";
     // This is now a simple text generation, but could be a model call if more complex logic was needed
     return Promise.resolve(prompt);
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 85593d0 (Initial commit - AI Studio export)
