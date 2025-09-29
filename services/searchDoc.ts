@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-export function searchChunks(query: string, chunks: string[], k = 4): string[] {
-=======
 export function searchChunks(query: string, chunks: { text: string, pageStart: number, pageEnd: number }[], k = 4): { text: string, pageStart: number, pageEnd: number }[] {
->>>>>>> 85593d0 (Initial commit - AI Studio export)
     if (!query || chunks.length === 0) {
         return [];
     }
@@ -14,11 +10,7 @@ export function searchChunks(query: string, chunks: { text: string, pageStart: n
     }
 
     const scoredChunks = chunks.map((chunk, index) => {
-<<<<<<< HEAD
-        const chunkTextLower = chunk.toLowerCase();
-=======
         const chunkTextLower = chunk.text.toLowerCase();
->>>>>>> 85593d0 (Initial commit - AI Studio export)
         let score = 0;
         queryTerms.forEach(term => {
             if (chunkTextLower.includes(term)) {
@@ -40,8 +32,6 @@ export function searchChunks(query: string, chunks: { text: string, pageStart: n
 
     return sortedChunks.slice(0, k).map(item => item.chunk);
 }
-<<<<<<< HEAD
-=======
 
 export function searchChunksWithCoverage(
     query: string,
@@ -104,4 +94,3 @@ export function searchChunksWithCoverage(
     // 3. Sort final list by page number and return
     return results.sort((a, b) => a.pageStart - b.pageStart);
 }
->>>>>>> 85593d0 (Initial commit - AI Studio export)
