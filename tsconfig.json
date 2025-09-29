@@ -10,6 +10,12 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
+<<<<<<< HEAD
+=======
+    "types": [
+      "node"
+    ],
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",

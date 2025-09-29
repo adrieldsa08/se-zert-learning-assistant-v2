@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import { getSearchResponse, generateFlashcards, generateSummary, generatePodcast, getCertificate } from './services/geminiService';
+<<<<<<< HEAD
 import type { Message, ProgressData, Flashcard, DocContextType } from './types';
+=======
+import type { GeminiToolResponse } from './services/geminiService';
+import { generateCertificateImage } from './services/certificateGenerator';
+import type { Message, ProgressData, Flashcard, DocContextType, WebSource } from './types';
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 import { Role } from './types';
 import { DocContext } from './contexts/DocContext';
 
@@ -36,15 +42,50 @@ const tools: { id: Tool; name: string; icon: React.ReactNode }[] = [
 
 
 // --- UI COMPONENTS ---
+<<<<<<< HEAD
+=======
+const WebSourceList: React.FC<{ sources: WebSource[] }> = ({ sources }) => {
+    if (!sources || sources.length === 0) return null;
+    return (
+        <div className="mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">
+            <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Sources</h4>
+            <ul className="list-disc list-inside space-y-1">
+                {sources.map((source, index) => (
+                    <li key={index} className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" title={source.title}>
+                           {source.title}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 const ChatMessage: React.FC<{ message: Message }> = ({ message }) => {
     const isAssistant = message.role === Role.ASSISTANT;
     const bubbleClasses = isAssistant ? 'bg-assistant-bubble-light dark:bg-assistant-bubble-dark self-start rounded-r-xl rounded-bl-xl' : 'bg-user-bubble text-white self-end rounded-l-xl rounded-br-xl';
     const LoadingDots = () => ( <div className="flex space-x-1 p-2"> <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div> <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div> <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce"></div> </div> );
     return (
         <div className={`flex w-full ${isAssistant ? 'justify-start' : 'justify-end'}`}>
+<<<<<<< HEAD
             <div className={`max-w-xl lg:max-w-2xl px-5 py-3 text-light-text dark:text-dark-text shadow-md ${bubbleClasses} transition-colors duration-300 whitespace-pre-wrap`}>
                 {message.isLoading ? <LoadingDots /> : message.content}
                 {message.source && !message.isLoading && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">Source: {message.source}</p>}
+=======
+            <div className={`max-w-xl lg:max-w-2xl px-5 py-3 text-light-text dark:text-dark-text shadow-md ${bubbleClasses} transition-colors duration-300`}>
+                {message.pageConstraint && !message.isLoading && (
+                    <div className="mb-2 text-xs font-semibold text-primary dark:text-primary-dark bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded-full inline-block">
+                        Filtered to {message.pageConstraint}
+                    </div>
+                )}
+                <div className="whitespace-pre-wrap">
+                    {message.isLoading ? <LoadingDots /> : message.content}
+                </div>
+                {message.pdfSource && !message.isLoading && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">Source: {message.pdfSource}</p>}
+                {message.webSources && !message.isLoading && <WebSourceList sources={message.webSources} />}
+                {message.webSources?.length === 0 && !message.isLoading && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">Source: Model’s general knowledge (no external attribution returned).</p>}
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
             </div>
         </div>
     );
@@ -82,10 +123,31 @@ const ToolInputForm: React.FC<{ onSubmit: (topic: string) => void; isLoading: bo
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSubmit(topic); };
     return ( <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3 p-1"> <input type="text" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={placeholder} className="flex-1 w-full p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-light-card dark:bg-dark-card focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" disabled={isLoading} aria-label="Topic input" /> <button type="submit" className="w-full sm:w-auto px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors shadow-lg" disabled={!topic.trim() || isLoading} aria-label={cta}> {isLoading ? 'Generating...' : cta} </button> </form> );
 };
+<<<<<<< HEAD
 const ResponseDisplay: React.FC<{ content: string; error?: string | null; source?: string | null }> = ({ content, error, source }) => {
     if (error) return <div className="mt-4 p-4 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300 rounded-lg">{error}</div>;
     if (!content) return null;
     return <div className="mt-4 p-4 bg-assistant-bubble-light dark:bg-assistant-bubble-dark rounded-lg whitespace-pre-wrap">{content}{source && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">Source: {source}</p>}</div>;
+=======
+const ResponseDisplay: React.FC<{ content: string; error?: string | null; source?: string | null; webSources?: WebSource[] | null; pageConstraint?: string | null;}> = ({ content, error, source, webSources, pageConstraint }) => {
+    if (error) return <div className="mt-4 p-4 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300 rounded-lg">{error}</div>;
+    if (!content) return null;
+    return (
+        <div className="mt-4 p-4 bg-assistant-bubble-light dark:bg-assistant-bubble-dark rounded-lg">
+             {pageConstraint && (
+                <div className="mb-2 text-xs font-semibold text-primary dark:text-primary-dark bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded-full inline-block">
+                    Filtered to {pageConstraint}
+                </div>
+            )}
+            <div className="whitespace-pre-wrap">
+                {content}
+            </div>
+            {source && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">Source: {source}</p>}
+            {webSources && <WebSourceList sources={webSources} />}
+            {webSources?.length === 0 && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-300 dark:border-slate-600">Source: Model’s general knowledge (no external attribution returned).</p>}
+        </div>
+    );
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 };
 const UploadControl: React.FC = () => {
     const docContext = useContext(DocContext);
@@ -201,22 +263,47 @@ const SearchTool: React.FC<{ docContext: DocContextType }> = ({ docContext }) =>
         const loadingMessage: Message = { id: `assistant-loading-${Date.now()}`, role: Role.ASSISTANT, content: '...', isLoading: true };
         setMessages(prev => [...prev, userMessage, loadingMessage]);
         setInput('');
+<<<<<<< HEAD
+=======
+        handleClearImages();
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 
         try {
             const imagePayload = await Promise.all(
                 attachedImages.map(img => fileToBase64(img.file).then(res => ({ mimeType: res.mime, data: res.data })))
             );
+<<<<<<< HEAD
             const responseText = await getSearchResponse(messageText, chunks, imagePayload);
             const assistantMessage: Message = { id: `assistant-${Date.now()}`, role: Role.ASSISTANT, content: responseText, source: chunks ? fileName : null };
             setMessages(prev => [...prev.filter(msg => !msg.isLoading), assistantMessage]);
         } catch (error) {
             console.error("Error processing images or sending message:", error);
             const errorMessage: Message = { id: `assistant-error-${Date.now()}`, role: Role.ASSISTANT, content: "Sorry, there was an error processing your images. Please try again." };
+=======
+            const response = await getSearchResponse(messageText, chunks, imagePayload);
+            
+            const assistantMessage: Message = {
+                id: `assistant-${Date.now()}`,
+                role: Role.ASSISTANT,
+                content: response.content,
+                pdfSource: response.pdfSource ? fileName : null,
+                webSources: response.webSources,
+                pageConstraint: response.pageConstraint,
+            };
+            setMessages(prev => [...prev.filter(msg => !msg.isLoading), assistantMessage]);
+        } catch (error) {
+            console.error("Error processing images or sending message:", error);
+            const errorMessage: Message = { id: `assistant-error-${Date.now()}`, role: Role.ASSISTANT, content: "Sorry, there was an error processing your request. Please try again." };
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
             setMessages(prev => [...prev.filter(msg => !msg.isLoading), errorMessage]);
         }
     };
     
+<<<<<<< HEAD
     useEffect(() => { if(messages.length === 0) { setMessages([{id: 'welcome-search', role: Role.ASSISTANT, content: "Ask me anything about your Systems Engineering course material, or attach an image to discuss."}]) } }, [messages.length]);
+=======
+    useEffect(() => { if(messages.length === 0) { setMessages([{id: 'welcome-search', role: Role.ASSISTANT, content: "Ask me anything about Systems Engineering. If you upload a PDF, I'll answer based on its content. Otherwise, I'll use Google Search.\n\nTip: Try filtering by page, e.g., 'summarize risk management from page 10' or 'what is a stakeholder on pages 3-5?'"}]) } }, [messages.length]);
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
     
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); sendMessage(input); };
 
@@ -288,6 +375,7 @@ const FlashcardsTool: React.FC<{ setProgress: React.Dispatch<React.SetStateActio
         const card = deck[currentCardIndex];
         return ( <div className="p-4 sm:p-6 text-center animate-fade-in"> <p className="text-secondary dark:text-slate-400 mb-2">Card {currentCardIndex + 1} of {deck.length}</p> {fileName && <p className="text-xs text-slate-500 mb-4">(Source: {fileName})</p>} <div className="min-h-[250px] p-6 bg-light-card dark:bg-dark-card rounded-xl shadow-lg flex flex-col justify-center items-center transition-all"> <p className="text-lg font-semibold text-secondary dark:text-slate-400 mb-2">{isAnswerShown ? 'Answer' : 'Question'}</p> <p className="text-xl text-light-text dark:text-dark-text">{isAnswerShown ? card.answer : card.question}</p> </div> {isAnswerShown ? ( <div className="mt-6"> <p className="mb-3 font-semibold">How well did you know this?</p> <div className="flex justify-center items-center space-x-4"> <button onClick={() => handleRating('easy')} className="px-6 py-2 rounded-lg text-white font-bold transition-transform transform hover:scale-105 shadow-md bg-green-500 hover:bg-green-600">Easy</button> <button onClick={() => handleRating('medium')} className="px-6 py-2 rounded-lg text-white font-bold transition-transform transform hover:scale-105 shadow-md bg-yellow-500 hover:bg-yellow-600">Medium</button> <button onClick={() => handleRating('hard')} className="px-6 py-2 rounded-lg text-white font-bold transition-transform transform hover:scale-105 shadow-md bg-red-500 hover:bg-red-600">Hard</button> </div> </div> ) : ( <button onClick={() => setIsAnswerShown(true)} className="mt-6 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors">Show Answer</button> )} </div> );
     }
+<<<<<<< HEAD
     return ( <div className="p-4 sm:p-6"> <ToolInputForm onSubmit={handleGenerate} isLoading={isLoading} placeholder="e.g., 'Lifecycle Models' or 'Chapter 3'" cta="Generate Flashcards" /> {error && <ResponseDisplay error={error} content="" />} {isLoading && <div className="flex justify-center mt-6"><LoadingSpinner /></div> } </div> );
 };
 const SummaryTool: React.FC<{ setProgress: React.Dispatch<React.SetStateAction<ProgressData>>; docContext: DocContextType }> = ({ setProgress, docContext }) => {
@@ -297,6 +385,17 @@ const SummaryTool: React.FC<{ setProgress: React.Dispatch<React.SetStateAction<P
     const [error, setError] = useState<string | null>(null);
     const handleGenerate = async (topic: string) => { setIsLoading(true); setError(null); setSummary(''); try { const result = await generateSummary(topic, chunks); setSummary(result); setProgress(p => ({...p, summariesAccessed: p.summariesAccessed + 1})); } catch (e: any) { setError(e.message); } finally { setIsLoading(false); } };
     return ( <div className="p-4 sm:p-6"> <ToolInputForm onSubmit={handleGenerate} isLoading={isLoading} placeholder="e.g., 'Requirements Engineering' or 'Chapter 4'" cta="Generate Summary" /> {isLoading ? <div className="flex justify-center mt-6"><LoadingSpinner /></div> : <ResponseDisplay content={summary} error={error} source={summary ? fileName : null} />} </div> );
+=======
+    return ( <div className="p-4 sm:p-6"> <ToolInputForm onSubmit={handleGenerate} isLoading={isLoading} placeholder="e.g., 'Lifecycle Models from page 10'" cta="Generate Flashcards" /> {error && <ResponseDisplay error={error} content="" />} {isLoading && <div className="flex justify-center mt-6"><LoadingSpinner /></div> } </div> );
+};
+const SummaryTool: React.FC<{ setProgress: React.Dispatch<React.SetStateAction<ProgressData>>; docContext: DocContextType }> = ({ setProgress, docContext }) => {
+    const { chunks, fileName } = docContext;
+    const [summaryResult, setSummaryResult] = useState<GeminiToolResponse | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const handleGenerate = async (topic: string) => { setIsLoading(true); setError(null); setSummaryResult(null); try { const result = await generateSummary(topic, chunks); setSummaryResult(result); if(result.content) setProgress(p => ({...p, summariesAccessed: p.summariesAccessed + 1})); } catch (e: any) { setError(e.message); } finally { setIsLoading(false); } };
+    return ( <div className="p-4 sm:p-6"> <ToolInputForm onSubmit={handleGenerate} isLoading={isLoading} placeholder="e.g., 'Requirements Engineering on pages 20-22'" cta="Generate Summary" /> {isLoading ? <div className="flex justify-center mt-6"><LoadingSpinner /></div> : <ResponseDisplay content={summaryResult?.content || ''} error={error} source={summaryResult?.pdfSource ? fileName : null} webSources={summaryResult?.webSources} pageConstraint={summaryResult?.pageConstraint} />} </div> );
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 };
 const PodcastTool: React.FC<{ setProgress: React.Dispatch<React.SetStateAction<ProgressData>>; docContext: DocContextType }> = ({ setProgress, docContext }) => {
     const { chunks, fileName } = docContext;
@@ -462,7 +561,11 @@ const PodcastTool: React.FC<{ setProgress: React.Dispatch<React.SetStateAction<P
       window.speechSynthesis.speak(utterance);
     }
 
+<<<<<<< HEAD
     return ( <div className="p-4 sm:p-6"> <ToolInputForm onSubmit={handleGenerate} isLoading={isLoading} placeholder="e.g., 'Verification and Validation'" cta="Generate Podcast Script" /> {isLoading ? <div className="flex justify-center mt-6"><LoadingSpinner /></div> : ( <> <ResponseDisplay content={script} error={error} source={script ? fileName : null} /> {script && !error && ( <div className="mt-4 flex justify-center flex-col items-center"> {!isSupported ? ( <p className="text-sm text-secondary dark:text-slate-400">Voice playback isn’t supported in this browser. Try Chrome/Edge/Safari.</p> ) : ( <> <div className="mb-4 w-full max-w-md flex items-center space-x-2"> <select value={selectedVoiceName || ''} onChange={handleVoiceChange} className="flex-1 p-2 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-light-card dark:bg-dark-card focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" aria-label="Select voice"> {voices.map(voice => <option key={voice.name} value={voice.name}>{voice.name} ({voice.lang})</option>)} </select> <button onClick={testVoice} className="px-3 py-2 bg-slate-200 dark:bg-slate-600 text-light-text dark:text-dark-text font-bold rounded-lg shadow-md hover:bg-slate-300 dark:hover:bg-slate-500" aria-label="Test selected voice">Test voice</button> </div> <div className="flex flex-wrap items-center justify-center gap-2"> <button onClick={handlePlay} disabled={playbackState !== 'idle'} className="px-4 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Play (Alt+P)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" /></svg> Play </button> <button onClick={handlePause} disabled={playbackState !== 'playing'} className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-light-text dark:text-dark-text font-bold rounded-lg shadow-md hover:bg-slate-300 dark:hover:bg-slate-500 disabled:bg-slate-400 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Pause (Alt+U)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg> Pause </button> <button onClick={handleResume} disabled={playbackState !== 'paused'} className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-light-text dark:text-dark-text font-bold rounded-lg shadow-md hover:bg-slate-300 dark:hover:bg-slate-500 disabled:bg-slate-400 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Resume (Alt+R)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" /></svg> Resume </button> <button onClick={handleStop} disabled={playbackState === 'idle'} className="px-4 py-2 bg-red-500 text-white font-bold rounded-lg shadow-md hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Stop (Alt+S)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 11-16 0 8 8 0 0116 0zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg> Stop </button> </div> </> )} </div> )} </> )} </div> );
+=======
+    return ( <div className="p-4 sm:p-6"> <ToolInputForm onSubmit={handleGenerate} isLoading={isLoading} placeholder="e.g., 'Verification and Validation from page 50'" cta="Generate Podcast Script" /> {isLoading ? <div className="flex justify-center mt-6"><LoadingSpinner /></div> : ( <> <ResponseDisplay content={script} error={error} source={script ? fileName : null} /> {script && !error && ( <div className="mt-4 flex justify-center flex-col items-center"> {!isSupported ? ( <p className="text-sm text-secondary dark:text-slate-400">Voice playback isn’t supported in this browser. Try Chrome/Edge/Safari.</p> ) : ( <> <div className="mb-4 w-full max-w-md flex items-center space-x-2"> <select value={selectedVoiceName || ''} onChange={handleVoiceChange} className="flex-1 p-2 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-light-card dark:bg-dark-card focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" aria-label="Select voice"> {voices.map(voice => <option key={voice.name} value={voice.name}>{voice.name} ({voice.lang})</option>)} </select> <button onClick={testVoice} className="px-3 py-2 bg-slate-200 dark:bg-slate-600 text-light-text dark:text-dark-text font-bold rounded-lg shadow-md hover:bg-slate-300 dark:hover:bg-slate-500" aria-label="Test selected voice">Test voice</button> </div> <div className="flex flex-wrap items-center justify-center gap-2"> <button onClick={handlePlay} disabled={playbackState !== 'idle'} className="px-4 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Play (Alt+P)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" /></svg> Play </button> <button onClick={handlePause} disabled={playbackState !== 'playing'} className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-light-text dark:text-dark-text font-bold rounded-lg shadow-md hover:bg-slate-300 dark:hover:bg-slate-500 disabled:bg-slate-400 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Pause (Alt+U)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg> Pause </button> <button onClick={handleResume} disabled={playbackState !== 'paused'} className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-light-text dark:text-dark-text font-bold rounded-lg shadow-md hover:bg-slate-300 dark:hover:bg-slate-500 disabled:bg-slate-400 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Resume (Alt+R)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" /></svg> Resume </button> <button onClick={handleStop} disabled={playbackState === 'idle'} className="px-4 py-2 bg-red-500 text-white font-bold rounded-lg shadow-md hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors flex items-center" aria-label="Stop (Alt+S)"> <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 11-16 0 8 8 0 0116 0zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg> Stop </button> </div> </> )} </div> )} </> )} </div> );
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 };
 const CertificateTool: React.FC<{ progress: ProgressData }> = ({ progress }) => {
     const { podcastSessions, summariesAccessed, flashcardDecksCreated } = progress;
@@ -470,12 +573,40 @@ const CertificateTool: React.FC<{ progress: ProgressData }> = ({ progress }) => 
     const isReadyForCertificate = topicsReviewed >= TOTAL_CHAPTERS_FOR_CERTIFICATION;
     const [certificateText, setCertificateText] = useState('');
     const [copied, setCopied] = useState(false);
+<<<<<<< HEAD
 
     useEffect(() => { const fetchCertificate = async () => { const text = await getCertificate(isReadyForCertificate); setCertificateText(text); }; fetchCertificate(); }, [isReadyForCertificate]);
     const handleCopy = () => { if (navigator.clipboard) { const cleanText = certificateText.replace('🎉 Congratulations, Max!\n', '').replace(/\n\nWould you like to save or share this on LinkedIn\?$/, ''); navigator.clipboard.writeText(cleanText); setCopied(true); setTimeout(() => setCopied(false), 2000); } };
     const handleDownload = () => { const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 800; const ctx = canvas.getContext('2d'); if (!ctx) return; ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = '#34D399'; ctx.lineWidth = 15; ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20); ctx.strokeStyle = '#475569'; ctx.lineWidth = 4; ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60); ctx.textAlign = 'center'; ctx.fillStyle = '#0f172a'; ctx.font = 'bold 60px serif'; ctx.fillText('Certificate of Completion', canvas.width / 2, 180); ctx.font = '28px serif'; ctx.fillText('This is to certify that', canvas.width / 2, 280); ctx.font = 'italic bold 70px cursive'; ctx.fillStyle = '#34D399'; ctx.fillText("Max", canvas.width / 2, 380); ctx.font = '28px serif'; ctx.fillStyle = '#475569'; ctx.fillText('has successfully completed all core modules of the', canvas.width / 2, 460); ctx.fillText('SE-ZERT Systems Engineering learning program.', canvas.width / 2, 510); ctx.font = '24px serif'; ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center'; ctx.fillText(`Date: ${new Date().toLocaleDateString()}`, canvas.width / 4, 650); ctx.fillText('Tutor Signature', (canvas.width / 4) * 3, 650); ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(canvas.width / 4 - 100, 620); ctx.lineTo(canvas.width / 4 + 100, 620); ctx.stroke(); ctx.beginPath(); ctx.moveTo((canvas.width / 4) * 3 - 100, 620); ctx.lineTo((canvas.width / 4) * 3 + 100, 620); ctx.stroke(); const link = document.createElement('a'); link.download = 'SE-ZERT-Certificate-of-Completion.png'; link.href = canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
 
     return ( <div className="p-4 sm:p-8 text-center animate-fade-in"> <h2 className="text-2xl font-bold mb-4">Your Certificate</h2> <div className="max-w-2xl mx-auto p-6 bg-light-card dark:bg-dark-card rounded-xl shadow-lg flex flex-col items-center"> <div className="whitespace-pre-wrap text-light-text dark:text-dark-text"> {certificateText ? certificateText : <LoadingSpinner />} </div> {isReadyForCertificate && certificateText && ( <div className="flex flex-col sm:flex-row items-center justify-center mt-6 space-y-3 sm:space-y-0 sm:space-x-4"> <button onClick={handleCopy} className="w-full sm:w-auto px-6 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:bg-slate-400" disabled={copied}> {copied ? 'Copied!' : 'Copy Certificate Text'} </button> <button onClick={handleDownload} className="w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors flex items-center justify-center"> <DownloadIcon className="h-5 w-5 mr-2" /> Download Certificate </button> </div> )} </div> </div> );
+=======
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    useEffect(() => { const fetchCertificate = async () => { const text = await getCertificate(isReadyForCertificate); setCertificateText(text); }; fetchCertificate(); }, [isReadyForCertificate]);
+    const handleCopy = () => { if (navigator.clipboard) { const cleanText = certificateText.replace('🎉 Congratulations, Max!\n', '').replace(/\n\nWould you like to save or share this on LinkedIn\?$/, ''); navigator.clipboard.writeText(cleanText); setCopied(true); setTimeout(() => setCopied(false), 2000); } };
+    
+    const handleDownload = async () => {
+        setIsGenerating(true);
+        try {
+            const imageUrl = await generateCertificateImage(progress, <SeZertLogo className="w-full h-full text-[#B48811]" />);
+            const link = document.createElement('a');
+            link.download = 'SE-ZERT-Certificate-of-Completion.png';
+            link.href = imageUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Failed to generate certificate:", error);
+            alert("Sorry, there was an error generating your certificate. Please try again.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+
+    return ( <div className="p-4 sm:p-8 text-center animate-fade-in"> <h2 className="text-2xl font-bold mb-4">Your Certificate</h2> <div className="max-w-2xl mx-auto p-6 bg-light-card dark:bg-dark-card rounded-xl shadow-lg flex flex-col items-center"> <div className="whitespace-pre-wrap text-light-text dark:text-dark-text"> {certificateText ? certificateText : <LoadingSpinner />} </div> {isReadyForCertificate && certificateText && ( <div className="flex flex-col sm:flex-row items-center justify-center mt-6 space-y-3 sm:space-y-0 sm:space-x-4"> <button onClick={handleCopy} className="w-full sm:w-auto px-6 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:bg-slate-400" disabled={copied}> {copied ? 'Copied!' : 'Copy Certificate Text'} </button> <button onClick={handleDownload} disabled={isGenerating} className="w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors flex items-center justify-center disabled:bg-slate-400 disabled:cursor-wait"> <DownloadIcon className="h-5 w-5 mr-2" /> {isGenerating ? 'Generating...' : 'Download Certificate'} </button> </div> )} </div> </div> );
+>>>>>>> 85593d0 (Initial commit - AI Studio export)
 };
 
 // --- MAIN APP ---
